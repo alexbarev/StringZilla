@@ -116,6 +116,7 @@ inline void memcpy(void *target, void const *source, std::size_t n) noexcept {
 
 #pragma region Character Sets
 
+namespace detail {
 /**
  *  @brief  The concatenation of the `ascii_lowercase` and `ascii_uppercase`. This value is not locale-dependent.
  *          https://docs.python.org/3/library/string.html#string.ascii_letters
@@ -262,6 +263,9 @@ inline carray<64> const &base64() noexcept {
     };
     return all;
 }
+} // namespace detail
+
+#pragma endregion
 
 /**
  *  @brief  A set of characters represented as a bitset with 256 slots.
@@ -328,18 +332,47 @@ class basic_charset {
 
 using char_set = basic_charset<char>;
 
-inline char_set ascii_letters_set() { return char_set {ascii_letters()}; }
-inline char_set ascii_lowercase_set() { return char_set {ascii_lowercase()}; }
-inline char_set ascii_uppercase_set() { return char_set {ascii_uppercase()}; }
-inline char_set ascii_printables_set() { return char_set {ascii_printables()}; }
-inline char_set ascii_controls_set() { return char_set {ascii_controls()}; }
-inline char_set digits_set() { return char_set {digits()}; }
-inline char_set hexdigits_set() { return char_set {hexdigits()}; }
-inline char_set octdigits_set() { return char_set {octdigits()}; }
-inline char_set punctuation_set() { return char_set {punctuation()}; }
-inline char_set whitespaces_set() { return char_set {whitespaces()}; }
-inline char_set newlines_set() { return char_set {newlines()}; }
-inline char_set base64_set() { return char_set {base64()}; }
+template <std::size_t count_characters>
+class carray_wrapper {
+    static_assert(count_characters > 0, "Character array cannot be empty");
+    using carray = char[count_characters];
+    carray const &all;
+    char_set const charset;
+
+  public:
+    carray_wrapper(carray const &chars) noexcept
+        : all(chars), charset {char_set {all}.add(all[count_characters - 1])} {}
+
+    operator char_set() const noexcept { return charset; }
+
+    carray const &operator()() const noexcept { return all; }
+};
+
+carray_wrapper<sizeof(detail::ascii_letters())> ascii_letters {detail::ascii_letters()};
+carray_wrapper<sizeof(detail::ascii_lowercase())> ascii_lowercase {detail::ascii_lowercase()};
+carray_wrapper<sizeof(detail::ascii_uppercase())> ascii_uppercase {detail::ascii_uppercase()};
+carray_wrapper<sizeof(detail::ascii_printables())> ascii_printables {detail::ascii_printables()};
+carray_wrapper<sizeof(detail::ascii_controls())> ascii_controls {detail::ascii_controls()};
+carray_wrapper<sizeof(detail::digits())> digits {detail::digits()};
+carray_wrapper<sizeof(detail::hexdigits())> hexdigits {detail::hexdigits()};
+carray_wrapper<sizeof(detail::octdigits())> octdigits {detail::octdigits()};
+carray_wrapper<sizeof(detail::punctuation())> punctuation {detail::punctuation()};
+carray_wrapper<sizeof(detail::whitespaces())> whitespaces {detail::whitespaces()};
+carray_wrapper<sizeof(detail::newlines())> newlines {detail::newlines()};
+carray_wrapper<sizeof(detail::base64())> base64 {detail::base64()};
+
+inline char_set ascii_letters_set() { return char_set {ascii_letters}; }
+inline char_set ascii_lowercase_set() { return char_set {ascii_lowercase}; }
+inline char_set ascii_uppercase_set() { return char_set {ascii_uppercase}; }
+inline char_set ascii_printables_set() { return char_set {ascii_printables}; }
+inline char_set ascii_controls_set() { return char_set {ascii_controls}; }
+inline char_set digits_set() { return char_set {digits}; }
+inline char_set hexdigits_set() { return char_set {hexdigits}; }
+inline char_set octdigits_set() { return char_set {octdigits}; }
+inline char_set punctuation_set() { return char_set {punctuation}; }
+inline char_set whitespaces_set() { return char_set {whitespaces}; }
+inline char_set newlines_set() { return char_set {newlines}; }
+inline char_set base64_set() { return char_set {base64}; }
 
 /**
  *  @brief  A look-up table for character replacement operations.
