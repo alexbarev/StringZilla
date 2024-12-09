@@ -313,7 +313,7 @@ class basic_charset {
         basic_charset result = *this;
         result.bitset_._u64s[0] |= other.bitset_._u64s[0], result.bitset_._u64s[1] |= other.bitset_._u64s[1],
             result.bitset_._u64s[2] |= other.bitset_._u64s[2], result.bitset_._u64s[3] |= other.bitset_._u64s[3];
-        return result;
+        return *this;
     }
 
     inline basic_charset &add(char_type c) noexcept {
